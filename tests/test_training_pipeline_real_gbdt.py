@@ -67,8 +67,14 @@ def test_real_gbdt_training_pipeline_writes_contract_artifact(tmp_path: Path) ->
     assert ctx.artifact_manifest is not None
     assert ctx.model_artifact["kind"] == "panel_ltr_xgboost"
     assert ctx.model_artifact["feature_cols"] == ["x1", "x2"]
+    assert ctx.model_artifact["fingerprint"].startswith("sha256:")
+    assert not ctx.model_artifact["fingerprint"].startswith("sha256:sha256:")
     assert ctx.model_artifact["oos_per_fold_ic"]
     assert ctx.model_artifact["cv_embargo_days"] == 2
+    assert ctx.artifact_manifest["feature_cols"] == ["x1", "x2"]
+    assert ctx.artifact_manifest["kind"] == "panel_ltr_xgboost"
+    assert ctx.artifact_manifest["local_artifact_path"] == ctx.model_artifact["local_artifact_path"]
+    assert ctx.artifact_manifest["lookahead_days"] == 2
     assert ctx.metrics_record["panel_contract_ok"] is True
     model_path = Path(ctx.model_artifact["local_artifact_path"])
     assert model_path.exists()

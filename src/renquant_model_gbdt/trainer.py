@@ -77,7 +77,7 @@ def train_panel_ltr_artifact(
     model.save(output_path, metadata=metadata)
     artifact = json.loads(output_path.read_text(encoding="utf-8"))
     artifact.update({
-        "fingerprint": f"sha256:{sha256_file(output_path)}",
+        "fingerprint": sha256_file(output_path),
         "uri": artifact_uri,
         "local_artifact_path": str(output_path),
     })

@@ -30,6 +30,7 @@ def test_training_pipeline_uses_common_task_job_pattern(tmp_path: Path) -> None:
             "uri": "object://renquant-artifacts/gbdt-fixture.json",
             "promotion_status": "candidate",
             "feature_cols": ["alpha_1", "alpha_2"],
+            "local_artifact_path": str(output_dir / "gbdt-fixture.json"),
             "trained_date": "2026-05-25",
             "config_fingerprint": "sha256:config",
             "panel_shape": {"rows": 1000, "cols": 2},
@@ -67,6 +68,9 @@ def test_training_pipeline_uses_common_task_job_pattern(tmp_path: Path) -> None:
     assert ctx.calibration_artifact == {"kind": "global_calibrator"}
     assert ctx.artifact_manifest is not None
     assert ctx.artifact_manifest["data_fingerprint"] == "sha256:test"
+    assert ctx.artifact_manifest["feature_cols"] == ["alpha_1", "alpha_2"]
+    assert ctx.artifact_manifest["local_artifact_path"].endswith("gbdt-fixture.json")
+    assert ctx.artifact_manifest["lookahead_days"] == 5
     assert ctx.metrics_record["oos_mean_ic"] == pytest.approx(0.031)
     assert ctx.metrics_record["panel_contract_ok"] is True
 

@@ -112,6 +112,9 @@ class BuildArtifactManifestTask(Task):
             "config_fingerprint": ctx.model_config.get("config_fingerprint", "unfingerprinted"),
             "code_commit": ctx.model_config.get("code_commit", "uncommitted"),
         }
+        for key in _RUNTIME_ARTIFACT_FIELDS:
+            if key in ctx.model_artifact and ctx.model_artifact[key] is not None:
+                manifest[key] = ctx.model_artifact[key]
         validate_artifact_manifest(manifest)
         ctx.artifact_manifest = manifest
         return True
@@ -137,3 +140,19 @@ class PanelGbdtTrainingPipeline(Pipeline):
 
     def __init__(self, loader: DatasetLoader, trainer: Trainer, validator: Validator) -> None:
         super().__init__([TrainingJob(loader, trainer, validator)], name="panel-gbdt-training")
+
+
+_RUNTIME_ARTIFACT_FIELDS = (
+    "kind",
+    "feature_cols",
+    "feature_columns",
+    "input_feature_cols",
+    "local_artifact_path",
+    "artifact_path",
+    "trained_date",
+    "lookahead_days",
+    "panel_shape",
+    "cv_method",
+    "cv_embargo_days",
+    "train_run_id",
+)
