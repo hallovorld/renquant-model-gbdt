@@ -7,11 +7,14 @@ from .pipelines import (
     TrainingContext,
     ValidateManifestTask,
 )
+from .trainer import train_panel_ltr_artifact, validate_panel_ltr_artifact
 
 __all__ = [
     "BuildArtifactManifestTask",
     "PanelGbdtTrainingPipeline",
     "TrainingContext",
     "ValidateManifestTask",
+    "train_panel_ltr_artifact",
     "transform_feature_frame",
+    "validate_panel_ltr_artifact",
 ]

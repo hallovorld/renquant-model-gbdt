@@ -9,7 +9,9 @@ def test_model_gbdt_root_import_does_not_pull_execution_runtime() -> None:
 
     forbidden_prefixes = (
         "alpaca",
+        "backtesting",
         "ib_insync",
+        "kernel",
         "live",
         "renquant_execution",
     )

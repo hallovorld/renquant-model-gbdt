@@ -22,9 +22,16 @@ portfolio QP execution, broker adapters, or strategy scheduling.
 
 All workflows are expressed as `renquant-common` Task/Job/Pipeline chains.
 
-The first bootstrap commit contains a dependency-injected training pipeline
-contract. The existing production code will be ported into these tasks in
-small reviewed slices rather than copied wholesale.
+The current real implementation supports the first production slice:
+
+- XGBoost `rank:pairwise` panel-LTR via `PanelLTRModel`.
+- Purged K-fold / combinatorial purged CV IC estimation.
+- `train_panel_ltr_artifact()` for already-materialized panel datasets.
+
+The trainer deliberately does not fetch market data or build alpha features.
+Its dataset input must be a dict with `panel`, `group_sizes`, and
+`feature_cols`; missing columns, missing groups, unsupported backends, or
+embargo shorter than lookahead fail closed.
 
 ## Initial Split Source
 
