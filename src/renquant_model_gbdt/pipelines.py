@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from renquant_common import Job, Pipeline, Task
+from renquant_artifacts import validate_artifact_manifest
+from renquant_base_data import validate_data_manifest
 
 
 @dataclass
@@ -25,6 +27,7 @@ class TrainingContext:
     dataset: Any | None = None
     model_artifact: dict[str, Any] | None = None
     calibration_artifact: dict[str, Any] | None = None
+    artifact_manifest: dict[str, Any] | None = None
     metrics_record: dict[str, Any] = field(default_factory=dict)
 
 
@@ -37,10 +40,7 @@ class ValidateManifestTask(Task):
     """Fail fast when the data contract is not auditable."""
 
     def run(self, ctx: TrainingContext) -> bool | None:
-        required = ("dataset_id", "fingerprint", "schema_version")
-        missing = [key for key in required if not ctx.dataset_manifest.get(key)]
-        if missing:
-            raise ValueError(f"dataset_manifest missing required keys: {missing}")
+        validate_data_manifest(ctx.dataset_manifest)
         ctx.output_dir.mkdir(parents=True, exist_ok=True)
         return True
 
@@ -78,6 +78,33 @@ class ValidateModelTask(Task):
         return True
 
 
+class BuildArtifactManifestTask(Task):
+    """Convert trainer output into a registry-valid artifact manifest."""
+
+    def run(self, ctx: TrainingContext) -> bool | None:
+        if ctx.model_artifact is None:
+            raise ValueError("model_artifact is required before artifact manifest build")
+        required = ("artifact_id", "model_family", "fingerprint", "uri")
+        missing = [key for key in required if not ctx.model_artifact.get(key)]
+        if missing:
+            raise ValueError(f"model_artifact missing required keys: {missing}")
+        manifest = {
+            "artifact_id": ctx.model_artifact["artifact_id"],
+            "model_family": ctx.model_artifact["model_family"],
+            "strategy": ctx.model_config.get("strategy", "renquant_104"),
+            "fingerprint": ctx.model_artifact["fingerprint"],
+            "uri": ctx.model_artifact["uri"],
+            "promotion_status": ctx.model_artifact.get("promotion_status", "candidate"),
+            "metrics": dict(ctx.metrics_record),
+            "data_fingerprint": ctx.dataset_manifest["fingerprint"],
+            "config_fingerprint": ctx.model_config.get("config_fingerprint", "unfingerprinted"),
+            "code_commit": ctx.model_config.get("code_commit", "uncommitted"),
+        }
+        validate_artifact_manifest(manifest)
+        ctx.artifact_manifest = manifest
+        return True
+
+
 class TrainingJob(Job):
     def __init__(self, loader: DatasetLoader, trainer: Trainer, validator: Validator) -> None:
         self._tasks = [
@@ -85,6 +112,7 @@ class TrainingJob(Job):
             LoadDatasetTask(loader),
             TrainModelTask(trainer),
             ValidateModelTask(validator),
+            BuildArtifactManifestTask(),
         ]
 
     @property

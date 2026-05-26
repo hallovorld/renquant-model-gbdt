@@ -3,6 +3,17 @@
 Production model-training repository for RenQuant's current GBDT / panel-LTR
 model line.
 
+Operating model: https://github.com/hallovorld/RenQuant/blob/main/doc/arch/subrepo-operating-model.md
+
+Repository map: [RENQUANT_REPOS.md](RENQUANT_REPOS.md)
+
+Local automation:
+
+```bash
+make test
+make doctor
+```
+
 This repo owns training, scoring, validation, and model-ledger output for the
 current production model family. It must not own live order placement,
 portfolio QP execution, broker adapters, or strategy scheduling.

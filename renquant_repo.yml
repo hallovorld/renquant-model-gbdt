@@ -1,0 +1,38 @@
+schema_version: 1
+name: renquant-model-gbdt
+role: current production GBDT / panel-LTR model training pipeline
+operating_model: https://github.com/hallovorld/RenQuant/blob/main/doc/arch/subrepo-operating-model.md
+repo_map: RENQUANT_REPOS.md
+pipeline_required: true
+branch_policy:
+  main: stable interface for downstream repos and automation
+  feature_branches: experiments, optimizations, and large upgrades
+source_repo:
+  name: RenQuant
+  never_delete: true
+dependencies:
+  - renquant-common
+  - renquant-strategy-104
+  - renquant-base-data
+  - renquant-artifacts
+inputs:
+  - strategy config bundle
+  - data manifest
+  - training config
+outputs:
+  - model artifact manifest
+  - calibrator manifest
+  - metrics ledger row
+owns:
+  - GBDT training pipeline
+  - model scoring validation
+  - calibration diagnostics
+  - training ledger output
+forbidden:
+  - broker order placement
+  - runtime QP/order-intent generation
+  - daily schedule ownership
+  - raw data storage in Git
+automation:
+  test: make test
+  doctor: make doctor
