@@ -74,6 +74,20 @@ def train_panel_ltr_artifact(
         "feature_importances": train_result.get("feature_importances", {}),
         "source_contract": "materialized_panel_v1",
     }
+    if config.get("feature_means") is not None:
+        metadata["feature_means"] = list(config["feature_means"])
+    if config.get("feature_stds") is not None:
+        metadata["feature_stds"] = list(config["feature_stds"])
+    if config.get("feature_norm_kind") is not None:
+        metadata["feature_norm_kind"] = list(config["feature_norm_kind"])
+    if config.get("feature_raw_clip_low") is not None:
+        metadata["feature_raw_clip_low"] = list(config["feature_raw_clip_low"])
+    if config.get("feature_raw_clip_high") is not None:
+        metadata["feature_raw_clip_high"] = list(config["feature_raw_clip_high"])
+    if config.get("feature_source_space") is not None:
+        metadata["feature_source_space"] = str(config["feature_source_space"])
+    if config.get("feature_clip") is not None:
+        metadata["feature_clip"] = float(config["feature_clip"])
     model.save(output_path, metadata=metadata)
     artifact = json.loads(output_path.read_text(encoding="utf-8"))
     artifact.update({

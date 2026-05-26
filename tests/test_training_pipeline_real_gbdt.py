@@ -82,6 +82,42 @@ def test_real_gbdt_training_pipeline_writes_contract_artifact(tmp_path: Path) ->
     assert payload["train_run_id"] == "run-real-gbdt"
 
 
+def test_real_gbdt_training_preserves_runtime_feature_transform_metadata(tmp_path: Path) -> None:
+    panel, group_sizes, feature_cols = make_easy_panel(n_dates=18, n_tickers=6, seed=22)
+    ctx = TrainingContext(
+        dataset_manifest=_dataset_manifest(),
+        model_config=_model_config(
+            feature_means=[10.0, 100.0],
+            feature_stds=[2.0, 10.0],
+            feature_norm_kind=["legacy_full_z", "robust_z"],
+            feature_raw_clip_low=[0.0, 0.0],
+            feature_raw_clip_high=[20.0, 200.0],
+            feature_source_space="raw",
+            feature_clip=4.0,
+        ),
+        output_dir=tmp_path / "out",
+    )
+
+    PanelGbdtTrainingPipeline(
+        lambda _: {"panel": panel, "group_sizes": group_sizes, "feature_cols": feature_cols},
+        train_panel_ltr_artifact,
+        validate_panel_ltr_artifact,
+    ).run(ctx)
+
+    assert ctx.model_artifact is not None
+    assert ctx.artifact_manifest is not None
+    for key in (
+        "feature_means",
+        "feature_stds",
+        "feature_norm_kind",
+        "feature_raw_clip_low",
+        "feature_raw_clip_high",
+        "feature_source_space",
+        "feature_clip",
+    ):
+        assert ctx.artifact_manifest[key] == ctx.model_artifact[key]
+
+
 def test_real_gbdt_pipeline_rejects_unsupported_backend(tmp_path: Path) -> None:
     panel, group_sizes, feature_cols = make_easy_panel(n_dates=12, n_tickers=6, seed=21)
     ctx = TrainingContext(
