@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from renquant_common import Job, Pipeline, Task
-from renquant_artifacts import validate_artifact_manifest
+from renquant_artifacts import validate_artifact_manifest, validate_panel_artifact_contract
 from renquant_base_data import validate_data_manifest
 
 
@@ -88,6 +88,18 @@ class BuildArtifactManifestTask(Task):
         missing = [key for key in required if not ctx.model_artifact.get(key)]
         if missing:
             raise ValueError(f"model_artifact missing required keys: {missing}")
+        panel_contract = validate_panel_artifact_contract(
+            ctx.model_artifact,
+            strict=bool(ctx.model_config.get("strict_panel_contract", True)),
+            runtime_config=ctx.model_config,
+        )
+        if not panel_contract.ok:
+            raise ValueError(
+                "model_artifact panel contract failed: "
+                f"errors={panel_contract.errors}; warnings={panel_contract.warnings}"
+            )
+        ctx.metrics_record.setdefault("panel_contract_ok", panel_contract.ok)
+        ctx.metrics_record.setdefault("panel_contract_details", panel_contract.details)
         manifest = {
             "artifact_id": ctx.model_artifact["artifact_id"],
             "model_family": ctx.model_artifact["model_family"],

@@ -12,6 +12,8 @@ dependencies = [
   "renquant-common>=0.1.0",
   "renquant-base-data>=0.1.0",
   "renquant-artifacts>=0.1.0",
+  "numpy>=1.26",
+  "pandas>=2.0",
 ]
 
 [tool.setuptools.packages.find]
