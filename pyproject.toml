@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renquant-model-gbdt"
-version = "0.1.0"
+version = "0.2.0"
 description = "GBDT panel-LTR model training and validation for RenQuant."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "renquant-common>=0.1.0",
+  "renquant-common>=0.2,<0.3",
   "renquant-base-data>=0.1.0",
   "renquant-artifacts>=0.1.0",
   "numpy>=1.26",
@@ -17,6 +17,9 @@ dependencies = [
   "scipy>=1.11",
   "xgboost>=2.1",
 ]
+
+[project.entry-points."renquant_common.scorers"]
+panel_ltr_xgboost = "renquant_model_gbdt.scorer:load"
 
 [tool.setuptools.packages.find]
 where = ["src"]
