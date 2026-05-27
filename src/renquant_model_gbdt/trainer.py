@@ -12,13 +12,14 @@ import pandas as pd
 
 from renquant_artifacts import sha256_file
 
-from .ltr_model import PanelLTRModel
-from .purged_cv import (
+from renquant_common.purged_cv import (
     CombinatorialPurgedCV,
     PurgedKFold,
     cross_validated_ic,
     cross_validated_ic_cpcv,
 )
+
+from .ltr_model import PanelLTRModel
 
 
 def train_panel_ltr_artifact(
